@@ -16,5 +16,5 @@ Using WMI to check MS Cluster Resources, Cluster Disk space, Cluster Nodes and C
 2. Create Sensor and set "Use Windows credentials of parent device" 
 
 ## Examples
-![PRTG-MSCluster-PrefNodes](media/Ok.png)
-![PRTG-MSCluster-PrefNodes](media/Warning.png)
+![PRTG-MSCluster-Status](media/Ok.png)
+![PRTG-MSCluster-Status](media/Warning.png)
