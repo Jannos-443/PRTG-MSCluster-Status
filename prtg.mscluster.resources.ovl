@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <ValueLookup id="prtg.mscluster.resources" desiredValue="2" undefinedState="Error">
+    <Lookups>
+      <SingleInt state="Error" value="-1">Unknown</SingleInt>
+      <SingleInt state="Warning" value="0">Inherited</SingleInt>
+      <SingleInt state="Warning" value="1">Initializing</SingleInt>
+      <SingleInt state="Ok" value="2">Online</SingleInt>
+      <SingleInt state="Error" value="3">Offline</SingleInt>
+      <SingleInt state="Error" value="4">Failed</SingleInt>
+      <SingleInt state="Error" value="126">Cannot Online</SingleInt>
+      <SingleInt state="Error" value="127">Cannot Online</SingleInt>
+      <SingleInt state="Warning" value="128">Pending</SingleInt>
+      <SingleInt state="Warning" value="129">Online Pending</SingleInt>
+      <SingleInt state="Warning" value="130">Offline Pending</SingleInt>
+    </Lookups>
+  </ValueLookup>

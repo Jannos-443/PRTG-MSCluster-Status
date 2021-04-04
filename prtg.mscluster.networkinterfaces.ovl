@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <ValueLookup id="prtg.mscluster.networkinterfaces" desiredValue="3" undefinedState="Error">
+    <Lookups>
+      <SingleInt state="Error" value="-1">Unknown</SingleInt>
+      <SingleInt state="Error" value="0">Unavailable</SingleInt>
+      <SingleInt state="Error" value="1">Failed</SingleInt>
+      <SingleInt state="Error" value="2">Unreachable</SingleInt>
+      <SingleInt state="OK" value="3">Up</SingleInt>
+    </Lookups>
+  </ValueLookup>
