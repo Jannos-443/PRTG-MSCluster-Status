@@ -13,8 +13,14 @@ Using WMI to check MS Cluster Resources, Cluster Disk space, Cluster Nodes and C
 
 1. Place "PRTG-MSCluster-Status.ps1" under "C:\Program Files (x86)\PRTG Network Monitor\Custom Sensors\EXEXML"
 
-2. Create Sensor and set "Use Windows credentials of parent device" 
+2. Place the lookup Files under (C:\Program Files (x86)\PRTG Network Monitor\lookups\custom)
+   - prtg.mscluster.networkinterfaces.ovl
+   - prtg.mscluster.nodes.ovl
+   - prtg.mscluster.resources.ovl
+
+3. Run PRTG Lookup File Reload
+
+4. Create Sensor and set "Use Windows credentials of parent device" 
 
 ## Examples
 ![PRTG-MSCluster-Status](media/Ok.png)
-![PRTG-MSCluster-Status](media/Warning.png)
