@@ -22,5 +22,11 @@ Using WMI to check MS Cluster Resources, Cluster Disk space, Cluster Nodes and C
 
 4. Create Sensor and set **Use Windows credentials of parent device** 
 
+| Setting | Value |
+| --- | --- |
+| Parameter -Cluster | %host or Cluster IP/FQDN |
+| Parameter -selChann | Include/Exclude Channels (default enables all) |
+| Security Context | Use Windows credentials of parent device |
+
 ## Examples
 ![PRTG-MSCluster-Status](media/Ok.png)
