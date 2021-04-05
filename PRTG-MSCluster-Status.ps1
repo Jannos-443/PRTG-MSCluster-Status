@@ -11,8 +11,17 @@
     + Parameters: -Cluster Fileserver1
     + Security Context: Use Windows credentials of parent device
 
+    Copy Lookup Files to (${env:ProgramFiles(x86)}\PRTG Network Monitor\lookups\custom) 
+    - prtg.mscluster.networkinterfaces.ovl
+    - prtg.mscluster.nodes.ovl
+    - prtg.mscluster.resources.ovl
+
+
     .PARAMETER Cluster
     Cluster FQDN or Name
+
+    .PARAMETER selChann
+    Use to include/exclude for large Clusters
 
     .EXAMPLE
     Sample call from PRTG EXE/Script Advanced
@@ -27,8 +36,14 @@
     https://docs.microsoft.com/en-us/previous-versions/windows/desktop/cluswmi/mscluster-node
 #>
 param(
-    [string]$Cluster = $null
+    [string]$Cluster = $null,
+    [string]$selChann = "NRID" # Inital channel selection
 )
+
+$includeNodes = $selChann.Contains("N")
+$includeResources = $selChann.Contains("R")
+$includeInterfaces = $selChann.Contains("I")
+$includeDisks = $selChann.Contains("D")
 
 #catch all unhadled errors
 trap{
@@ -52,10 +67,27 @@ if(($Cluster -eq $null) -or ($Cluster -eq ""))
 
 #Get Resources, Disks, Network Interfaces and Nodes
 Try{
-    $Resources = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_Resource" -ComputerName $Cluster -ErrorAction Stop
-    $disks = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_DiskPartition" -ComputerName $Cluster -ErrorAction Stop
-    $Interfaces = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_NetworkInterface" -ComputerName $Cluster -ErrorAction Stop
-    $Nodes = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_Node" -ComputerName $Cluster -ErrorAction Stop
+    if($includeNodes)
+        {
+        $Nodes = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_Node" -ComputerName $Cluster -ErrorAction Stop
+        }
+    
+    if($includeResources)
+        {
+        $Resources = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_Resource" -ComputerName $Cluster -ErrorAction Stop
+        }
+
+    if($includeInterfaces)
+        {
+        $Interfaces = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_NetworkInterface" -ComputerName $Cluster -ErrorAction Stop
+        
+        }
+
+    if($includeDisks)
+        {
+        $disks = Get-CimInstance -Namespace "root\MSCluster" -ClassName "MSCluster_DiskPartition" -ComputerName $Cluster -ErrorAction Stop
+        }
+      
     }
 
 catch{
@@ -66,83 +98,103 @@ catch{
     Exit
     }
 
-$ActiveNodesTxt = "ActiveNodes: "
-$ActiveNodes = ($Nodes | where {$_.state -eq 0}).Count
+
 
 #Write Output
 $xmlOutput = '<prtg>'
 
-#Active Nodes Count
-$xmlOutput = $xmlOutput + "<result>
-        <channel>Nodes Active</channel>
-        <value>$ActiveNodes</value>
-        <unit>Count</unit>
-        <limitmode>1</limitmode>
-        <LimitMinError>1</LimitMinError>
-        </result>"
-
-#Nodes
-foreach ($Node in $Nodes)
+#Node Output:
+if($includeNodes)
     {
-    if($Node.state -eq "0")
-        {
-        $ActiveNodesTxt += "$($Node.name), "
-        }
+
+    #Active Nodes Count
+    $ActiveNodesTxt = "ActiveNodes: "
+    $ActiveNodes = ($Nodes | where {$_.state -eq 0}).Count
+    
     $xmlOutput = $xmlOutput + "<result>
-    <channel>Node $($Node.Name)</channel>
-    <value>$($Node.State)</value>
-    <ValueLookup>prtg.mscluster.nodes</ValueLookup>
-    </result>"
-    }
+            <channel>Nodes Active</channel>
+            <value>$ActiveNodes</value>
+            <unit>Count</unit>
+            <limitmode>1</limitmode>
+            <LimitMinError>1</LimitMinError>
+            </result>"
+
+    #Nodes
+    foreach ($Node in $Nodes)
+        {
+        if($Node.state -eq "0")
+            {
+            $ActiveNodesTxt += "$($Node.name), "
+            }
+        $xmlOutput = $xmlOutput + "<result>
+        <channel>Node $($Node.Name)</channel>
+        <value>$($Node.State)</value>
+        <ValueLookup>prtg.mscluster.nodes</ValueLookup>
+        </result>"
+        }
 
 
-# Output Active Nodes
-if($ActiveNodes -gt 0)
-    {
-    $xmlOutput = $xmlOutput + "<text>$($ActiveNodesTxt)</text>"
-    }
+    # Output Active Nodes
+    if($ActiveNodes -gt 0)
+        {
+        $xmlOutput = $xmlOutput + "<text>$($ActiveNodesTxt)</text>"
+        }
 
-# Output NO Active Nodes
-else
-    {
-    $xmlOutput = $xmlOutput + "<text>No Active Nodes!</text>"
+    # Output NO Active Nodes
+    else
+        {
+        $xmlOutput = $xmlOutput + "<text>No Active Nodes!</text>"
+        }
+
     }
 
 #Recources
-foreach ($Resource in $Resources)
+if($includeResources)
     {
-    $xmlOutput = $xmlOutput + "<result>
-        <channel>Res $($Resource.Name)</channel>
-        <value>$($Resource.State)</value>
-        <ValueLookup>prtg.mscluster.resources</ValueLookup>
-        </result>"
+    foreach ($Resource in $Resources)
+        {
+        $xmlOutput = $xmlOutput + "<result>
+            <channel>Res $($Resource.Name)</channel>
+            <value>$($Resource.State)</value>
+            <ValueLookup>prtg.mscluster.resources</ValueLookup>
+            </result>"
+        }
+
     }
 
-#Disks
-foreach ($disk in $disks)
-    {
-    $usedspace = [math]::Round((100-($disk.FreeSpace/$disk.TotalSize*100)),0)
-    $name = "$($disk.Path) $($disk.VolumeLabel)"
 
-    $xmlOutput = $xmlOutput + "<result>
-        <channel>Disk $($name)</channel>
-        <value>$($usedspace)</value>
-        <unit>Percent</unit>
-        <limitmode>1</limitmode>
-        <LimitMaxError>95</LimitMaxError>
-        <LimitMaxWarning>90</LimitMaxWarning>
-        </result>"
+#Disks
+if($includeDisks)
+    {
+    foreach ($disk in $disks)
+        {
+        $usedspace = [math]::Round((100-($disk.FreeSpace/$disk.TotalSize*100)),0)
+        $name = "$($disk.Path) $($disk.VolumeLabel)"
+
+        $xmlOutput = $xmlOutput + "<result>
+            <channel>Disk $($name)</channel>
+            <value>$($usedspace)</value>
+            <unit>Percent</unit>
+            <limitmode>1</limitmode>
+            <LimitMaxError>95</LimitMaxError>
+            <LimitMaxWarning>90</LimitMaxWarning>
+            </result>"
+        }
+
     }
 
 
 #Network Interfaces
-foreach ($Interface in $Interfaces)
+if($includeInterfaces)
     {
-    $xmlOutput = $xmlOutput + "<result>
-        <channel>Net $($Interface.Name)</channel>
-        <value>$($Interface.State)</value>
-        <ValueLookup>prtg.mscluster.networkinterfaces</ValueLookup>
-        </result>"
+    foreach ($Interface in $Interfaces)
+        {
+        $xmlOutput = $xmlOutput + "<result>
+            <channel>Net $($Interface.Name)</channel>
+            <value>$($Interface.State)</value>
+            <ValueLookup>prtg.mscluster.networkinterfaces</ValueLookup>
+            </result>"
+        }
     }
 
 
