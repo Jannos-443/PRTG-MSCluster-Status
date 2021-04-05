@@ -20,7 +20,7 @@ Using WMI to check MS Cluster Resources, Cluster Disk space, Cluster Nodes and C
 
 3. Run PRTG Lookup File Reload
 
-4. Create Sensor and set **Use Windows credentials of parent device** 
+4. Create Sensor
 
 | Setting | Value |
 | --- | --- |
