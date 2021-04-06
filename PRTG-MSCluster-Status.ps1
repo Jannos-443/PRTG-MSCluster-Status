@@ -107,10 +107,19 @@ $xmlOutput = '<prtg>'
 if($includeNodes)
     {
 
-    #Active Nodes Count
+    #Active Nodes Count 
+    #Runs twice because we want "ActiveNodes" as First Channel
     $ActiveNodesTxt = "ActiveNodes: "
-    $ActiveNodes = ($Nodes | where {$_.state -eq 0}).Count
-    
+    $ActiveNodes = 0
+    foreach ($Node in $Nodes)
+        {
+        if($Node.state -eq "0")
+            {
+            $ActiveNodes += 1
+            $ActiveNodesTxt += "$($Node.name), "
+            }
+        }
+
     $xmlOutput = $xmlOutput + "<result>
             <channel>Nodes Active</channel>
             <value>$ActiveNodes</value>
@@ -122,10 +131,6 @@ if($includeNodes)
     #Nodes
     foreach ($Node in $Nodes)
         {
-        if($Node.state -eq "0")
-            {
-            $ActiveNodesTxt += "$($Node.name), "
-            }
         $xmlOutput = $xmlOutput + "<result>
         <channel>Node $($Node.Name)</channel>
         <value>$($Node.State)</value>
