@@ -24,6 +24,7 @@ Using WMI to check MS Cluster Resources, Cluster Disk space, Cluster Nodes and C
 
 | Setting | Value |
 | --- | --- |
+| EXE/Script Advanced | PRTG-SQL-BackupAge.ps1 |
 | Parameter -Cluster | %host or Cluster IP/FQDN |
 | Parameter -selChann | Include/Exclude Channels (default enables all) |
 | Security Context | Use Windows credentials of parent device |
