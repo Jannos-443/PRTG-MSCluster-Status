@@ -205,4 +205,4 @@ if($includeInterfaces)
 
 $xmlOutput = $xmlOutput + "</prtg>"
 
-$xmlOutput
+Write-Output $xmlOutput
